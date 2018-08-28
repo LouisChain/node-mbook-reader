@@ -1,0 +1,41 @@
+{
+  "name": "mbookreader",
+  "version": "0.0.1",
+  "description": "audio book and epub reader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel-node ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LouisChain/MbookReader.git"
+  },
+  "keywords": [
+    "epub",
+    "ebook",
+    "audiobook"
+  ],
+  "author": "louis chain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LouisChain/MbookReader/issues"
+  },
+  "homepage": "https://github.com/LouisChain/MbookReader#readme",
+  "dependencies": {
+    "babel": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.2.9",
+    "morgan": "^1.9.0",
+    "multer": "^1.3.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "nodemon": "^1.18.3"
+  }
+}
