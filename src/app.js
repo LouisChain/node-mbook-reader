@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 // Connect mongoose
-mongoose.connect("mongodb://localhost:27017/MBookReader", {
+mongoose.connect("mongodb://45.32.99.230:27017/MBookReader", {
   useNewUrlParser: true
 });
 
