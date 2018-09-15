@@ -1,4 +1,5 @@
-var request = require("request");
+const request = require("request");
+const jsdom = require('jsdom');
 const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost:27017/MBookReader", {
   useNewUrlParser: true
@@ -19,9 +20,9 @@ mongoose.connect("mongodb://localhost:27017/MBookReader", {
 //   parser.parseComplete(body);
 // });
 
-const genJsDom = async (html) => {
+let genJsDom = async (html) => {
   /* parse the html and create a dom window */
-  let jsdom = require('jsdom');
+
   let { JSDOM } = jsdom;
   let dom = await new JSDOM(html, {
     // standard options:  disable loading other assets
@@ -38,7 +39,7 @@ const genJsDom = async (html) => {
   return $;
 }
 
-const retrieveHtml = (url) => {
+let retrieveHtml = (url) => {
   // try {
   //   let response = await request(url);
   //   return response.body;

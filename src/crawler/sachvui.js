@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const base = require("./base");
 const fs = require("fs");
 
-const retrieveCategory = async (url) => {
+let retrieveCategory = async (url) => {
   let html = await base.retrieveHtml(url);
   let $ = await base.genJsDom(html);
   let array = $('ul[class="center-block row"] li');
@@ -15,7 +15,7 @@ const retrieveCategory = async (url) => {
   await Promise.all(promises);
 }
 
-const saveCategory = async (category) => {
+let saveCategory = async (category) => {
   let aTag = category.firstChild;
   let name = aTag.text;
   let Category = require("../api/models/category");
@@ -43,7 +43,7 @@ const saveCategory = async (category) => {
     });
 }
 
-const listBook = async (url, page) => {
+let listBook = async (url, page) => {
   console.log("------------------------------------------------------------------------------------------------");
   console.log("---- Starting retrieve page " + page + "=>" + url);
   console.log("------------------------------------------------------------------------------------------------");
@@ -115,7 +115,7 @@ let downloadSync = async (link, dest) => {
   }
 }
 
-const retriveBook = async (html) => {
+let retriveBook = async (html) => {
   let $ = await base.genJsDom(html);
   let container = $('.panel-body')[0]
   let cover = '';
@@ -161,7 +161,7 @@ const retriveBook = async (html) => {
   return { cover, title, author, catg, description, downloadLink };
 }
 
-const saveBook = async (cover, title, author, catg, description, format) => {
+let saveBook = async (cover, title, author, catg, description, format) => {
   let Category = require("../api/models/category");
   let Book = require("../api/models/book");
   await Category.find({ name: catg })
@@ -191,15 +191,12 @@ const saveBook = async (cover, title, author, catg, description, format) => {
     });
 }
 
-const crawlJob = async () => {
+let crawlJob = async () => {
   try {
-    //await retrieveCategory("http://sachvui.com");
-    let promises = []
-    for (let i = 69; i <= 147; i++) {
-      // promises.push(listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i));
+    await retrieveCategory("http://sachvui.com");
+    for (let i = 1; i <= 147; i++) {
       await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);
     }
-    // await Promise.all(promises);
   } catch (error) {
     console.log(error);
   }
