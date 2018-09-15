@@ -34,7 +34,7 @@ let genJsDom = async (html) => {
   });
 
   let window = dom.window
-  let $ = require('jQuery')(window);
+  let $ = require('jquery')(window);
 
   return $;
 }
