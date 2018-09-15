@@ -59,3 +59,8 @@ typings/
 
 # next.js build output
 .next
+
+# project test folder
+/src/cover
+/src/ebook
+/src/mbook

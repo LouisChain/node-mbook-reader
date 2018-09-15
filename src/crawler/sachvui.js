@@ -1,57 +1,12 @@
 const md5 = require("md5");
-const downloader = require("download");
-var request = require("async-request");
+const download = require("download");
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/MBookReader", {
-  useNewUrlParser: true
-});
-// var htmlparser = require("htmlparser");
-// request({
-//   uri: "http://sachvui.com",
-// }, (error, response, body) => {
-//   var handler = new htmlparser.DefaultHandler(function (error, dom) {
-//     if (error) {
-//       console.log(error);
-//     }
-//     else {
-//       console.log(dom);
-//     }
-//   });
-//   var parser = new htmlparser.Parser(handler);
-//   parser.parseComplete(body);
-// });
-
-const genJsDom = (html) => {
-  /* parse the html and create a dom window */
-  let jsdom = require('jsdom');
-  let { JSDOM } = jsdom;
-  let dom = new JSDOM(html, {
-    // standard options:  disable loading other assets
-    // or executing script tags
-    FetchExternalResources: false,
-    ProcessExternalResources: false,
-    MutationEvents: false,
-    QuerySelector: false
-  });
-
-  let window = dom.window
-  let $ = require('jQuery')(window);
-
-  return $;
-}
-
-const retrieveHtml = async (url) => {
-  try {
-    let response = await request(url);
-    return response.body;
-  } catch (error) {
-    console.log(error);
-  }
-}
+const base = require("./base");
+const fs = require("fs");
 
 const retrieveCategory = async (url) => {
-  let html = await retrieveHtml(url);
-  let $ = await genJsDom(html);
+  let html = await base.retrieveHtml(url);
+  let $ = await base.genJsDom(html);
   let array = $('ul[class="center-block row"] li');
   let promises = [];
   for (let i = 0; i < array.length; i++) {
@@ -68,7 +23,7 @@ const saveCategory = async (category) => {
     .exec()
     .then(res => {
       if (res.length >= 1) {
-        console.log("Passed category >>> " + name);
+        console.log("Duplicated category >>> " + name);
       } else {
         let category = new Category({
           _id: new mongoose.Types.ObjectId(),
@@ -76,7 +31,7 @@ const saveCategory = async (category) => {
         });
         category.save()
           .then(c => {
-            console.log("Saved category: " + name);
+            console.log("Saved category >>> " + name);
           })
           .catch(err => {
             console.log("Save category error >>> " + name);
@@ -84,89 +39,84 @@ const saveCategory = async (category) => {
       }
     })
     .catch(err => {
-      console.log("Find Category failed: " + err);
+      console.log("Find Category failed >>> " + err);
     });
 }
 
 const listBook = async (url, page) => {
-  console.log("------------------------------------------------");
-  console.log("...Starting retrieve page: " + page + "=>" + url);
-  console.log("------------------------------------------------");
-  let html = await retrieveHtml(url);
-  let $ = await genJsDom(html);
+  console.log("------------------------------------------------------------------------------------------------");
+  console.log("---- Starting retrieve page " + page + "=>" + url);
+  console.log("------------------------------------------------------------------------------------------------");
+  let html = await base.retrieveHtml(url);
+  let $ = await base.genJsDom(html);
   let array = $('.col-md-9').find('.panel-body div');
   let aCounter = 0;
   for (let i = 0; i < array.length; i++) {
     let node = array[i].children[0].nodeName;
-    if (node === 'UL') {
-      let flag = -1;
-      let liNodes = array[i].children[0].children;
-      for (let k = liNodes.length - 1; k >= 0; k--) {
-        if (liNodes[k].className === 'active') {
-          flag = k;
-          break;
-        }
-      }
-      if (flag === liNodes.length - 1) {
-        console.log("Out of page, you crawl all of books");
-        return;
-      } else {
-        let nextNode = liNodes[flag + 1].children[0];
-        listBook(nextNode.href, nextNode.text);
-      }
-    } else if (node === 'A') {
-      // Wait for seconds
-      await sleep(2000);
+    if (node === 'A') {
       aCounter++;
       let bookDetail = array[i].children[0].href;
-      let bookHtml = await retrieveHtml(bookDetail);
+      let bookHtml = await base.retrieveHtml(bookDetail);
       let info = await retriveBook(bookHtml);
-
-      let cover = await md5(info.cover) + ".jpg";
-      let epub = '';
-      let epubLink = '';
-      let pdf = '';
-      let pdfLink = '';
-      let downloadLink = info.downloadLink;
-      for (let j = 0; j < downloadLink.length; j++) {
-        if (downloadLink[j].indexOf("epub") > 0) {
-          epub = await md5(downloadLink[j]) + ".epub";
-          epubLink = downloadLink[j];
+      if (!info || info.downloadLink.length === 0) {
+        continue;
+      }
+      let cover = md5(info.cover) + ".jpg";
+      let format = 'epub';
+      let ebookFileName = '';
+      let ebookLink = '';
+      let downloadLinks = info.downloadLink;
+      for (let j = 0; j < downloadLinks.length; j++) {
+        if (downloadLinks[j].indexOf("epub") > 0) {
+          ebookFileName = await md5(downloadLinks[j]) + ".epub";
+          ebookLink = downloadLinks[j];
+          format = 'epub';
           break;
         }
-        if (j === downloadLink.length - 1 && epub === '') {
-          pdf = await md5(downloadLink[j]) + ".pdf";
-          pdfLink = downloadLink[j];
+        if (j === downloadLinks.length - 1 && ebookFileName === '') {
+          ebookFileName = await md5(downloadLinks[j]) + ".pdf";
+          ebookLink = downloadLinks[j];
+          format = 'pdf';
         }
       }
-      let format = (epub === '') ? 'pdf' : 'epub';
-      await savebook(cover, info.title, info.author, info.catg, info.description, epub, pdf, format);
+
+      await saveBook(cover, info.title, info.author, info.catg, info.description, format);
 
       let path = __dirname.replace("crawler", "");
-      let fs = require("fs");
-      await downloader(info.cover).pipe(fs.createWriteStream(path + "cover/" + cover));
-      if (epub !== '') {
-        await downloader(epubLink).pipe(fs.createWriteStream(path + "file/" + epub));
+      let coverPath = path + "cover/";
+      let ebookPath = path + "ebook/";
+      if (!fs.existsSync(coverPath)) {
+        fs.mkdirSync(coverPath);
       }
-      if (pdf !== '') {
-        await downloader(pdfLink).pipe(fs.createWriteStream(path + "file/" + pdf));
+      if (!fs.existsSync(ebookPath)) {
+        fs.mkdirSync(ebookPath);
+      }
+      await downloadSync(info.cover, coverPath + cover);
+      if (ebookLink !== '') {
+        await downloadSync(ebookLink, ebookPath + ebookFileName);
       }
 
-      console.log("Page-" + page + "=>" + aCounter + '. Retrieved Book >>> \n\tCover: '
+      console.log("Page" + page + "=>" + aCounter + ' book retrieved info:  \n\tCover: '
         + info.cover + "\n\tTitle: "
         + info.title + "\n\tAuthor: "
         + info.author + "\n\tCategory: "
-        + info.catg + "\n\tLink Download: "
-        + info.downloadLink + "\n\tDescription: ");
-      // + info.description);
-    } else if (node === undefined) {
-      console.log("We do nothing at index " + i);
+        + info.catg + "\n\tLink Download: " + ebookLink);
     }
   }
 }
 
+let downloadSync = async (link, dest) => {
+  try {
+    await download(link).then(data => {
+      let a = fs.writeFileSync(dest, data);
+    });
+  } catch (err) {
+    console.log(">>> Cannot download file: " + link)
+  }
+}
+
 const retriveBook = async (html) => {
-  let $ = genJsDom(html);
+  let $ = await base.genJsDom(html);
   let container = $('.panel-body')[0]
   let cover = '';
   let title = '';
@@ -196,7 +146,7 @@ const retriveBook = async (html) => {
             let aNode = bookInfo.children[k];
             if (aNode.nodeName === 'A') {
               let link = aNode.href.toString();
-              if (link.indexOf('epub') > -1 || link.indexOf('pdf') > -1) {
+              if (link.indexOf('/epub/') > -1 || link.indexOf('/pdf/') > -1) {
                 downloadLink.push(aNode.href);
               }
             }
@@ -208,32 +158,32 @@ const retriveBook = async (html) => {
       description = child1.textContent;
     }
   }
-
-  // console.log('Book Infor >>> \nCover: ' + cover + "\nTitle: " + title + "\nAuthor: " + author
-  //   + "\nCategory: " + catg + "\nLink Download: " + downloadLink + "\nDescription: " + description);
-
   return { cover, title, author, catg, description, downloadLink };
 }
 
-const savebook = async (cover, title, author, catg, description, epub, pdf, format) => {
+const saveBook = async (cover, title, author, catg, description, format) => {
   let Category = require("../api/models/category");
+  let Book = require("../api/models/book");
   await Category.find({ name: catg })
     .exec()
     .then(result => {
       if (result.length >= 1) {
-        let Book = require("../api/models/book");
-        let book = new Book({
-          _id: new mongoose.Types.ObjectId(),
-          cover,
-          title,
-          author,
-          description,
-          category: result[0]._id,
-          epub,
-          pdf,
-          format
-        });
-        book.save();
+        Book.find({ title })
+          .exec()
+          .then(_book => {
+            if (_book.length <= 0) {
+              let book = new Book({
+                _id: new mongoose.Types.ObjectId(),
+                cover,
+                title,
+                author,
+                description,
+                category: result[0]._id,
+                format
+              });
+              book.save();
+            }
+          });
       }
     })
     .catch(err => {
@@ -241,21 +191,15 @@ const savebook = async (cover, title, author, catg, description, epub, pdf, form
     });
 }
 
-let endOfCrawl = async () => {
-  console.log("End of crawler!");
-}
-
-let sleep = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
 const crawlJob = async () => {
   try {
-    await retrieveCategory("http://sachvui.com");
-    await listBook("http://sachvui.com/the-loai/tat-ca.html/1", 1)
-    endOfCrawl();
+    //await retrieveCategory("http://sachvui.com");
+    let promises = []
+    for (let i = 69; i <= 147; i++) {
+      // promises.push(listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i));
+      await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);
+    }
+    // await Promise.all(promises);
   } catch (error) {
     console.log(error);
   }

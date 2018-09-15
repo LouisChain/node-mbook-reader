@@ -7,15 +7,17 @@ const bookSchema = new mongoose.Schema({
   title: { type: String, required: true },
   cover: { type: String, required: true },
   subtitle: { type: String, required: false },
-  epub: { type: String, required: false },
-  pdf: { type: String, required: false },
-  format: { type: String, required: false },
   author: { type: String, required: false },
   description: { type: String, required: false },
   tag: { type: String, required: false },
   translator: { type: String, required: false },
   publisher: { type: String, required: false },
+  ebook: { type: String, required: false },
+  format: { type: String, required: false },
+  reader: { type: String, required: false },
+  view: { type: Number, required: false },
+  mbook: { type: Array, required: false }// array of ID chapter
 })
 const bookModel = mongoose.model(Collection.COLLECTION_BOOK, bookSchema);
 
-module.exports = bookModel;
+module.exports = bookModel; 
