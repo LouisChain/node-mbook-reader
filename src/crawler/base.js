@@ -1,5 +1,5 @@
 const request = require("request");
-const jsdom = require('jsdom');
+
 const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost:27017/MBookReader", {
   useNewUrlParser: true
@@ -22,8 +22,8 @@ mongoose.connect("mongodb://localhost:27017/MBookReader", {
 
 let genJsDom = async (html) => {
   /* parse the html and create a dom window */
-
-  let { JSDOM } = jsdom;
+  const jsdom = require('jsdom');
+  const { JSDOM } = jsdom;
   let dom = await new JSDOM(html, {
     // standard options:  disable loading other assets
     // or executing script tags
