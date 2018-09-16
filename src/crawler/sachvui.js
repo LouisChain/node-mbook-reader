@@ -61,6 +61,7 @@ let listBook = async (url, page) => {
   for (let i = 0; i < array.length; i++) {
     let node = array[i].children[0].nodeName;
     if (node === 'A') {
+      base.sleep(100);
       aCounter++;
       let bookDetail = array[i].children[0].href;
       let bookHtml = await base.retrieveHtml(bookDetail);
@@ -98,7 +99,9 @@ let listBook = async (url, page) => {
       if (!fs.existsSync(ebookPath)) {
         fs.mkdirSync(ebookPath);
       }
+      base.sleep(100);
       await downloadSync(info.cover, coverPath + cover);
+      base.sleep(100);
       if (ebookLink !== '') {
         await downloadSync(ebookLink, ebookPath + ebookFileName);
       }
@@ -210,7 +213,7 @@ let crawlJob = async () => {
       await fs.unlink("log.txt");
     }
     await retrieveCategory("http://sachvui.com");
-    for (let i = 1; i <= 147; i++) {
+    for (let i = 21; i <= 147; i++) {
       await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);
     }
   } catch (error) {
