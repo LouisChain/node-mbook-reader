@@ -1,5 +1,5 @@
 const request = require("request");
-
+const fs = require("fs");
 const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost:27017/MBookReader", {
   useNewUrlParser: true
@@ -64,4 +64,8 @@ let sleep = (ms) => {
   })
 }
 
-module.exports = { genJsDom, retrieveHtml, sleep }
+let log = (message) => {
+  fs.appendFileSync("log.txt", message);
+}
+
+module.exports = { genJsDom, retrieveHtml, sleep, log }

@@ -22,8 +22,9 @@ let saveCategory = async (category) => {
   await Category.find({ name })
     .exec()
     .then(res => {
-      if (res.length >= 1) {
+      if (res.length > 0) {
         console.log("Duplicated category >>> " + name);
+        base.log("\nDuplicated category >>> " + name);
       } else {
         let category = new Category({
           _id: new mongoose.Types.ObjectId(),
@@ -32,14 +33,17 @@ let saveCategory = async (category) => {
         category.save()
           .then(c => {
             console.log("Saved category >>> " + name);
+            base.log("\nSaved category >>> " + name);
           })
           .catch(err => {
             console.log("Save category error >>> " + name);
+            base.log("\nSave category error >>> " + name);
           })
       }
     })
     .catch(err => {
       console.log("Find Category failed >>> " + err);
+      base.log("\nFind Category failed >>> " + err);
     });
 }
 
@@ -47,6 +51,9 @@ let listBook = async (url, page) => {
   console.log("------------------------------------------------------------------------------------------------");
   console.log("---- Starting retrieve page " + page + "=>" + url);
   console.log("------------------------------------------------------------------------------------------------");
+  base.log("\n------------------------------------------------------------------------------------------------"
+    + "\n---- Starting retrieve page " + page + "=>" + url
+    + "\n------------------------------------------------------------------------------------------------");
   let html = await base.retrieveHtml(url);
   let $ = await base.genJsDom(html);
   let array = $('.col-md-9').find('.panel-body div');
@@ -101,6 +108,11 @@ let listBook = async (url, page) => {
         + info.title + "\n\tAuthor: "
         + info.author + "\n\tCategory: "
         + info.catg + "\n\tLink Download: " + ebookLink);
+      base.log("\nPage" + page + "=>" + aCounter + ' book retrieved info:  \n\tCover: '
+        + info.cover + "\n\tTitle: "
+        + info.title + "\n\tAuthor: "
+        + info.author + "\n\tCategory: "
+        + info.catg + "\n\tLink Download: " + ebookLink);
     }
   }
 }
@@ -112,6 +124,7 @@ let downloadSync = async (link, dest) => {
     });
   } catch (err) {
     console.log(">>> Cannot download file: " + link)
+    base.log("\n>>> Cannot download file: " + link)
   }
 }
 
@@ -193,6 +206,7 @@ let saveBook = async (cover, title, author, catg, description, format) => {
 
 let crawlJob = async () => {
   try {
+    await fs.unlink("log.txt");
     await retrieveCategory("http://sachvui.com");
     for (let i = 1; i <= 147; i++) {
       await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);
