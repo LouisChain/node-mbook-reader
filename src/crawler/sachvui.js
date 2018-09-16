@@ -206,7 +206,9 @@ let saveBook = async (cover, title, author, catg, description, format) => {
 
 let crawlJob = async () => {
   try {
-    await fs.unlink("log.txt");
+    if (fs.existsSync(__dirname + "log.txt")) {
+      await fs.unlink("log.txt");
+    }
     await retrieveCategory("http://sachvui.com");
     for (let i = 1; i <= 147; i++) {
       await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);

@@ -65,7 +65,7 @@ let sleep = (ms) => {
 }
 
 let log = (message) => {
-  fs.appendFileSync("log.txt", message);
+  fs.appendFileSync(__dirname + "/log.txt", message);
 }
 
 module.exports = { genJsDom, retrieveHtml, sleep, log }
