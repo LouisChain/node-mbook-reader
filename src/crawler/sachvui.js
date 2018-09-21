@@ -215,9 +215,12 @@ let crawlJob = async () => {
       await fs.unlink(logFile);
     }
     await retrieveCategory("http://sachvui.com");
-    for (let i = 1; i <= 147; i++) {
+    for (let i = 1; i <= 2; i++) {
       await listBook("http://sachvui.com/the-loai/tat-ca.html/" + i, i);
     }
+    console.log("Crawl sachvui.com was done!")
+    base.log(logFile, "Crawl sachvui.com was done!");
+    process.exit();
   } catch (error) {
     console.log(error);
   }
