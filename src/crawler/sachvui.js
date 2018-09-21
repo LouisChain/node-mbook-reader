@@ -3,6 +3,7 @@ const download = require("download");
 const mongoose = require("mongoose");
 const base = require("./base");
 const fs = require("fs");
+const logFile = __dirname + "/sachvui.txt";
 
 let retrieveCategory = async (url) => {
   let html = await base.retrieveHtml(url);
@@ -24,7 +25,7 @@ let saveCategory = async (category) => {
     .then(res => {
       if (res.length > 0) {
         console.log("Duplicated category >>> " + name);
-        base.log("\nDuplicated category >>> " + name);
+        base.log(logFile, "\nDuplicated category >>> " + name);
       } else {
         let category = new Category({
           _id: new mongoose.Types.ObjectId(),
@@ -33,17 +34,17 @@ let saveCategory = async (category) => {
         category.save()
           .then(c => {
             console.log("Saved category >>> " + name);
-            base.log("\nSaved category >>> " + name);
+            base.log(logFile, "\nSaved category >>> " + name);
           })
           .catch(err => {
             console.log("Save category error >>> " + name);
-            base.log("\nSave category error >>> " + name);
+            base.log(logFile, "\nSave category error >>> " + name);
           })
       }
     })
     .catch(err => {
       console.log("Find Category failed >>> " + err);
-      base.log("\nFind Category failed >>> " + err);
+      base.log(logFile, "\nFind Category failed >>> " + err);
     });
 }
 
@@ -51,7 +52,7 @@ let listBook = async (url, page) => {
   console.log("------------------------------------------------------------------------------------------------");
   console.log("---- Starting retrieve page " + page + "=>" + url);
   console.log("------------------------------------------------------------------------------------------------");
-  base.log("\n------------------------------------------------------------------------------------------------"
+  base.log(logFile, "\n------------------------------------------------------------------------------------------------"
     + "\n---- Starting retrieve page " + page + "=>" + url
     + "\n------------------------------------------------------------------------------------------------");
   let html = await base.retrieveHtml(url);
@@ -61,7 +62,6 @@ let listBook = async (url, page) => {
   for (let i = 0; i < array.length; i++) {
     let node = array[i].children[0].nodeName;
     if (node === 'A') {
-      // base.sleep(100);
       aCounter++;
       let bookDetail = array[i].children[0].href;
       let bookHtml = await base.retrieveHtml(bookDetail);
@@ -88,8 +88,9 @@ let listBook = async (url, page) => {
         }
       }
 
-      await saveBook(cover, info.title, info.author, info.catg, info.description, format);
+      await saveBook(cover, info.cover, ebookLink, info.title, info.author, info.catg, info.description, format);
 
+      /*
       let path = __dirname.replace("crawler", "");
       let coverPath = path + "cover/";
       let ebookPath = path + "ebook/";
@@ -99,19 +100,18 @@ let listBook = async (url, page) => {
       if (!fs.existsSync(ebookPath)) {
         fs.mkdirSync(ebookPath);
       }
-      // base.sleep(100);
       await downloadSync(info.cover, coverPath + cover);
-      // base.sleep(100);
       if (ebookLink !== '') {
         await downloadSync(ebookLink, ebookPath + ebookFileName);
       }
+      */
 
       console.log("Page" + page + "=>" + aCounter + ' book retrieved info:  \n\tCover: '
         + info.cover + "\n\tTitle: "
         + info.title + "\n\tAuthor: "
         + info.author + "\n\tCategory: "
         + info.catg + "\n\tLink Download: " + ebookLink);
-      base.log("\nPage" + page + "=>" + aCounter + ' book retrieved info:  \n\tCover: '
+      base.log(logFile, "\nPage" + page + "=>" + aCounter + ' book retrieved info:  \n\tCover: '
         + info.cover + "\n\tTitle: "
         + info.title + "\n\tAuthor: "
         + info.author + "\n\tCategory: "
@@ -127,7 +127,7 @@ let downloadSync = async (link, dest) => {
     });
   } catch (err) {
     console.log(">>> Cannot download file: " + link)
-    base.log("\n>>> Cannot download file: " + link)
+    base.log(logFile, "\n>>> Cannot download file: " + link)
   }
 }
 
@@ -177,7 +177,7 @@ let retriveBook = async (html) => {
   return { cover, title, author, catg, description, downloadLink };
 }
 
-let saveBook = async (cover, title, author, catg, description, format) => {
+let saveBook = async (cover, coverLink, ebookLink, title, author, catg, description, format) => {
   let Category = require("../api/models/category");
   let Book = require("../api/models/book");
   await Category.find({ name: catg })
@@ -191,6 +191,8 @@ let saveBook = async (cover, title, author, catg, description, format) => {
               let book = new Book({
                 _id: new mongoose.Types.ObjectId(),
                 cover,
+                coverLink,
+                ebookLink,
                 title,
                 author,
                 description,
@@ -209,8 +211,8 @@ let saveBook = async (cover, title, author, catg, description, format) => {
 
 let crawlJob = async () => {
   try {
-    if (fs.existsSync(__dirname + "log.txt")) {
-      await fs.unlink("log.txt");
+    if (fs.existsSync(logFile)) {
+      await fs.unlink(logFile);
     }
     await retrieveCategory("http://sachvui.com");
     for (let i = 1; i <= 147; i++) {

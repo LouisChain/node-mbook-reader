@@ -64,4 +64,4 @@ typings/
 /src/cover
 /src/ebook
 /src/mbook
-/src/crawler/log.txt
+/src/*/*.txt
