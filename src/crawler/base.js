@@ -58,6 +58,18 @@ let retrieveHtml = (url) => {
   })
 }
 
+let retrieveHtml2 = (url) => {
+  return new Promise((resolve, reject) => {
+    request(url, { headers: { 'User-Agent': "Promise", accept: 'text/html' } }, (error, response, body) => {
+      if (!error) {
+        resolve(body);
+      } else {
+        reject(error);
+      }
+    })
+  })
+}
+
 let sleep = (ms) => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
@@ -68,4 +80,4 @@ let log = (path, message) => {
   fs.appendFileSync(path, message);
 }
 
-module.exports = { genJsDom, retrieveHtml, sleep, log }
+module.exports = { genJsDom, retrieveHtml, retrieveHtml2, sleep, log }
