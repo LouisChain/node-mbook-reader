@@ -18,6 +18,7 @@ const bookSchema = new mongoose.Schema({
   format: { type: String, required: false },
   reader: { type: String, required: false },
   view: { type: Number, required: false },
+  likeCount: { type: Number, required: false },
   mbook: { type: Array, required: false },// array of link chapter id
   mbookLink: { type: Array, required: false }// array of link chapter to webpage
 })
