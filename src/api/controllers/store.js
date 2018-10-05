@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const Exceptions = require("../utils/exception");
 const Book = require("../models/book");
 const Category = require("../models/category");
 
@@ -46,14 +46,10 @@ exports.fetchStore = (req, res, next) => {
 
           res.status(200).json({ data: result });
         })
-        .catch(error => {
-          console.log(error);
-          res.status(500).json({ error });
-        })
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ error });
+      res.status(500).json(Exceptions.unknown_error);
     })
 }
 
@@ -71,7 +67,7 @@ exports.getByCategory = (req, res, next) => {
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ error });
+      res.status(500).json(Exceptions.unknown_error);
     });
 }
 
@@ -89,6 +85,6 @@ exports.search = (req, res, next) => {
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ error });
+      res.status(500).json(Exceptions.unknown_error);
     });
 }
