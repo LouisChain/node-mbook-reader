@@ -4,11 +4,11 @@ const checkAuth = require("../middleware/check-auth");
 
 const Controller = require("../controllers/store");
 
-router.get("/", Controller.fetchStore);
+router.get("/", checkAuth, Controller.fetchStore);
 
-router.get("/category", Controller.getByCategory);
+router.get("/category", checkAuth, Controller.getByCategory);
 
-router.get("/search", Controller.search);
+router.get("/search", checkAuth, Controller.search);
 // router.post("/", checkAuth, upload.single("file"), Controller.createBook);
 
 // router.get("/:id", Controller.getBook);

@@ -4,12 +4,13 @@ const Exceptions = require("../utils/exception");
 
 module.exports = (req, res, next) => {
   try {
-    let token = req.headers.authorization.split(" ")[1];// Bearer xhxhxifjidjfidi >>> take second
+    let token = req.headers.authorization;
     if (token) {
+      token = token.split(" ")[1];// Bearer xhxhxifjidjfidi >>> take second
       // verifies secret and checks exp
-      jwt.verify(token, Const.JWT_KEY, function (err, decoded) {
+      jwt.verify(token, Const.TOKEN_SECRET, function (err, decoded) {
         if (err) {
-          return res.status(401).json(Exceptions.unauthorized_access);
+          return res.status(401).json(Exceptions.invalid_signature);
         }
         req.userData = decoded;
         next();
@@ -20,4 +21,4 @@ module.exports = (req, res, next) => {
   } catch (error) {
     res.status(401).json(Exceptions.unauthorized_access);
   }
-}
+} 

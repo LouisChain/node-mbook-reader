@@ -28,14 +28,14 @@ const refresh_token_notfound = {
   errorCode: 1005,
   message: "Refresh token not found"
 }
-const item_query_error = {
-  status: 500,
+const invalid_signature = {
+  status: 401,
   errorCode: 1006,
-  message: "Items query error"
+  message: "JsonWebTokenError"
 }
 
 module.exports = {
   unauthorized_access, missing_token, unknown_error,
   fb_token_expired, fb_token_invalid, refresh_token_notfound,
-  item_query_error
+  invalid_signature
 }

@@ -101,8 +101,45 @@ exports.deleteUser = (req, res, next) => {
     })
 }
 
+exports.grantAnonymous = (req, res, next) => {
+  let _id = new mongoose.Types.ObjectId();
+  let email = _id + "@email.com";
+  let fbId = "fb00000000";
+  let name = "Anonymous";
+  let { token, refreshToken, expiresAt } = genToken(_id.toHexString(), fbId, email);
+  let newUser = new User({
+    _id,
+    email,
+    facebookProvider: {
+      id: fbId,
+      name
+    },
+    expiresAt,
+    refreshToken
+  });
+  newUser.save()
+    .then(doc => {
+      let response = {
+        id: _id,
+        fbId,
+        token,
+        refreshToken,
+        name,
+        email,
+        birthday: "01-01-2018",
+        gender: "femail",
+        avatar: "",
+        expiresAt
+      }
+      res.status(200).json(response)
+    })
+    .catch(error => {
+      res.status(500).json(Exceptions.unknown_error)
+    })
+}
+
 exports.fbLogin = async (req, res, next) => {
-  let { fbToken } = req.body;
+  let { fbToken, anonymous } = req.body;
   let isValidAccessToken = await verifyFbAccessToken(fbToken, Const.FACEBOOK_APP_TOKEN, Const.FACEBOOK_APP_ID);
   if (isValidAccessToken) {
     let userInfo = await getUserInfo(fbToken);
@@ -168,7 +205,11 @@ exports.fbLogin = async (req, res, next) => {
           email: userInfo.email,
           expiresAt
         }
-        return res.status(200).json(response);
+        res.status(200).json(response);
+        // Delete anonymous
+        if (anonymous) {
+          User.remove({ _id: anonymous }).exec();
+        }
       })
       .catch(error => {
         console.log(err);
@@ -276,7 +317,7 @@ let genToken = (id, fbId, email) => {
       expiresIn: Const.REFRESH_LIFE
     }
   );
-  let expiresAt = new Date().getTime() + Const.TOKEN_LIFE;
+  let expiresAt = new Date().getTime() + Const.TOKEN_LIFE * 1000;
   return { token, refreshToken, expiresAt }
 }
 

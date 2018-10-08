@@ -5,6 +5,8 @@ const Controller = require("../controllers/user");
 
 router.post("/signup", Controller.signup);
 
+router.post("/grantAnonymous", Controller.grantAnonymous);
+
 router.post("/fbLogin", Controller.fbLogin);
 
 router.post("/token", Controller.refreshToken);

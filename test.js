@@ -1,14 +1,21 @@
 
-const download = require("download");
-const fs = require("fs");
+const a = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // console.log("A function done!")
+      resolve("A function done!");
+    }, 1000)
+  })
+}
 
-
-// downloader('http://sachvui.com/cover/2017/pr-la-song.jpg').pipe(fs.createWriteStream('foo.jpg'));
-// download('http://sachvui.com/cover/2017/pr-la-song.jpg', __dirname + '/ttt.jpg').then(() => {
-//     console.log('done!');
-// });
-
-download('http://sachvui.com/cover/2017/pr-la-song.jpg').then(data => {
-  fs.writeFile(__dirname + '/ttt.jpg', data, (err) => {});
-});
-console.log(__dirname);
+a()
+  .then(rs => {
+    console.log(rs);
+    return Promise.resolve("After then");
+  })
+  .then((s) => {
+    console.log(s);
+  })
+  .catch(error => {
+    console.log(error);
+  })
