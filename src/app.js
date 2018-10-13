@@ -13,6 +13,7 @@ mongoose.connect("mongodb://localhost:27017/MBookReader", {
 const bookRoutes = require("./api/routes/books")
 const storeRoutes = require("./api/routes/store")
 const userRoutes = require("./api/routes/user")
+const categoryRoutes = require("./api/routes/category")
 
 // Middlewares
 app.use(morgan("dev"))
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 app.use("/books", bookRoutes);
 app.use("/store", storeRoutes);
 app.use("/user", userRoutes);
+app.use("/category", categoryRoutes);
 
 // Error handling
 app.use((req, res, next) => {

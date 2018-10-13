@@ -33,9 +33,14 @@ const invalid_signature = {
   errorCode: 1006,
   message: "JsonWebTokenError"
 }
+const item_not_found = {
+  status: 404,
+  errorCode: 1007,
+  message: "Query item not found"
+}
 
 module.exports = {
   unauthorized_access, missing_token, unknown_error,
   fb_token_expired, fb_token_invalid, refresh_token_notfound,
-  invalid_signature
+  invalid_signature, item_not_found
 }
