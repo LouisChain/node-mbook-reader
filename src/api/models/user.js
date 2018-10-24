@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: String
+  },
+  countRead: {
+    type: Number
+  },
+  countListen: {
+    type: Number
   }
 })
 const userModel = mongoose.model("User", userSchema);

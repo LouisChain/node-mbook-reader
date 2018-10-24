@@ -72,14 +72,16 @@ exports.getByCategory = (req, res, next) => {
 }
 
 exports.search = (req, res, next) => {
-  let { keyword } = req.query;
+  let { keyword, limit } = req.query;
   Book.find(
     {
       $or: [
         { "title": { $regex: keyword, $options: "i" } },
         { "author": { $regex: keyword, $options: "i" } }
       ]
-    }).exec()
+    })
+    .limit(parseInt(limit))
+    .exec()
     .then(docs => {
       res.status(200).json({ data: docs });
     })
