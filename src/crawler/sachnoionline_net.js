@@ -139,6 +139,7 @@ let saveBook = async (cover, title, author, catg, description, chapters, tags, r
             if (_book.length <= 0) {
               let book = new Book({
                 _id: new mongoose.Types.ObjectId(),
+                coverLink: cover,
                 cover,
                 title,
                 author,
