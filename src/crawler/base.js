@@ -63,7 +63,7 @@ let retrieveHtml2 = url => {
   return new Promise((resolve, reject) => {
     request(
       url,
-      { headers: { "User-Agent": "Promise", accept: "text/html" } },
+      { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36", accept: "text/html" } },
       (error, response, body) => {
         if (!error) {
           resolve(body);
