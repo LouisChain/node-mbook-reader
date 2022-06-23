@@ -34,7 +34,7 @@
     "express": "^4.16.3",
     "htmlparser": "^1.7.7",
     "jquery": "^3.3.1",
-    "jsdom": "^12.0.0",
+    "jsdom": "^16.5.0",
     "jsonwebtoken": "^8.3.0",
     "md5": "^2.2.1",
     "mongoose": "^5.2.9",
